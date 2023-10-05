@@ -1,0 +1,116 @@
+---
+title: "World Population Dataset"
+author: "Kelly"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+tidyr and dplyr are both part of the tidyverse
+
+```{r load-tidyverse}
+library(tidyverse)
+```
+Load the untidy dataset
+```{r dataset}
+data <- read.csv("world_population.csv")
+
+# Get the number of rows and columns
+dim(data)
+
+# Display the structure
+str(data)
+
+# Preview of the data frame
+head(data)
+```
+
+Tidying the dataset
+```{r tidying}
+
+# Copy and pasting what Matthew wrote on the discussion board, the below words are not mine
+#This details regional populations from the years 2000 to 2022. To tidy this dataset, I would collapse the year variables into a single grouping column, effectively making it into a long dataset. From there, we can easily graph population rates by year, and potentially by country
+
+# I will first rename the column names to make them more clear
+data <- data %>%
+  rename("Country/Territory" = Country.Territory, "2022" = X2022.Population, "2020" = X2020.Population, "2015" = X2015.Population, "2010" = X2010.Population, "2000" = X2000.Population, "1990" = X1990.Population, "1980" = X1980.Population, "1970" = X1970.Population, "Area (km)" = Area..km.., "Density per km" = Density..per.km.., "Growth Rate" = Growth.Rate, "World Population Percentage" = World.Population.Percentage)
+
+# Make a long dataset by collapsing the years into a single column
+world_pop <- data %>%
+  pivot_longer(`2022`:`1970`, names_to = "Year", values_to = "Population")
+
+head(world_pop)
+```
+Analysis
+```{r analyze}
+
+# Statistics of Growths and Populations
+world_pop %>% summarize(average_growth_rate = mean(`Growth Rate`), min_growth_rate = min(`Growth Rate`), max_growth_rate = max(`Growth Rate`), smallest_population = min(Population), largest_population = max(Population))
+
+countries_with_highest_growth_rate <- world_pop %>% 
+  arrange(desc(`Growth Rate`)) %>% 
+  pull(`Country/Territory`)
+
+# Remove duplicate results due to having 8 separate years for the same growth rate
+countries_with_highest_growth_rate <- countries_with_highest_growth_rate[seq(1, 80, 8)]
+
+highest_growths <- world_pop %>% 
+  arrange(desc(`Growth Rate`)) %>% 
+  pull(`Growth Rate`)
+
+highest_growths <- highest_growths[seq(1, 80, 8)]
+
+# Top 10 highest growth rates ordered from high to low by country/territory
+names(highest_growths) <- countries_with_highest_growth_rate
+highest_growths
+
+# Plot of the top 10 countries/territories with the highest population growth rate
+world_pop %>% 
+  filter(`Country/Territory` %in% countries_with_highest_growth_rate) %>% 
+  ggplot(aes(x = Year, y = Population, color = `Country/Territory`)) + 
+  geom_point()
+
+
+countries_with_lowest_growth_rate <- world_pop %>% 
+  arrange(`Growth Rate`) %>% 
+  pull(`Country/Territory`)
+
+countries_with_lowest_growth_rate <- countries_with_lowest_growth_rate[seq(1, 80, 8)]
+
+lowest_growths <- world_pop %>% 
+  arrange(`Growth Rate`) %>% 
+  pull(`Growth Rate`)
+
+lowest_growths <- lowest_growths[seq(1, 80, 8)]
+
+# Bottom 10 lowest growth rates ordered from low to high by country/territory
+names(lowest_growths) <- countries_with_lowest_growth_rate
+lowest_growths
+
+# Plot of bottom 10 countries/territories with the lowest population growth rate
+world_pop %>% 
+  filter(`Country/Territory` %in% countries_with_lowest_growth_rate) %>% 
+  ggplot(aes(x = Year, y = Population, color = `Country/Territory`)) + 
+  geom_point()
+
+
+recent_pop_data <- world_pop %>%
+  filter(Year == 2022) %>%
+  arrange(desc(Population))
+
+# Top 10 Largest population in 2022 ordered from high to low
+head(recent_pop_data, n = 10)
+
+# Bottom 10 Smallest Population
+tail(recent_pop_data, n = 10)
+
+
+# Plot of population growth by year for all countries/territory
+# Asia have the biggest increase in terms of population
+world_pop %>%
+  ggplot(aes(x = Year, y = Population)) + geom_point(aes(col = Continent))
+  
+```
