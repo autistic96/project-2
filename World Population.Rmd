@@ -1,6 +1,6 @@
 ---
 title: "World Population Dataset"
-author: "Kelly"
+author: "Kelly Eng, Matthew Roland, Jean Jimenez"
 date: "2023-10-04"
 output: html_document
 ---
@@ -9,14 +9,25 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#World Population Dataset
+
+##Intro
+
+The World Population Dataset shows us population data across various countries and territories from 1970 to 2022. This dataset includes variables like area, density per km, growth rate, and the percentage of the world population. Its important to understand how to work with population data so that we can accuratly make predictions and models.
+
+
 tidyr and dplyr are both part of the tidyverse
+
+
 
 ```{r load-tidyverse}
 library(tidyverse)
+library(sf)
+library(downloader)
 ```
 Load the untidy dataset
 ```{r dataset}
-data <- read.csv("world_population.csv")
+data <- read.csv(url("https://raw.githubusercontent.com/autistic96/project-2/main/world_population.csv"))
 
 # Get the number of rows and columns
 dim(data)
@@ -28,7 +39,10 @@ str(data)
 head(data)
 ```
 
-Tidying the dataset
+##Tidying the dataset
+
+The dataset was first tidied to transform it into a long format, making it easier to manage and visualize. The names of the columns were standardized for better clarity. 
+
 ```{r tidying}
 
 # Copy and pasting what Matthew wrote on the discussion board, the below words are not mine
@@ -44,9 +58,12 @@ world_pop <- data %>%
 
 head(world_pop)
 ```
-Analysis
-```{r analyze}
 
+##Analysis
+
+Statistical summaries were generated to identify countries with the highest and lowest growth rates. The dataset was then visualized to display population trends over the years and across continents. Specifically, graphs were plotted to highlight the top and bottom 10 countries based on their population growth rates, as well as population sizes in 2022.
+
+```{r}
 # Statistics of Growths and Populations
 world_pop %>% summarize(average_growth_rate = mean(`Growth Rate`), min_growth_rate = min(`Growth Rate`), max_growth_rate = max(`Growth Rate`), smallest_population = min(Population), largest_population = max(Population))
 
@@ -63,16 +80,39 @@ highest_growths <- world_pop %>%
 
 highest_growths <- highest_growths[seq(1, 80, 8)]
 
+
+
+
+```
+
+
+
+Here, we loaded the world_map dataframe using st_read(). Then, two sets of countries are identified: those with the highest and lowest population growth rates. These sets are named countries_with_highest_growth_rate and countries_with_lowest_growth_rate, respectively. For the lowest growth rate, every 8th country is selected from a sorted list, up to 80. The top_and_bottom dataframe augments the world_map data by adding a fill column to color-code countries based on their growth rate. Finally, a plot is generated using ggplot2. The plot uses different colors for countries with the highest and lowest growth rates and labels them by name. The plot is then saved as a PNG file in the currentn working directory.
+
+```{r}
+
+
+current_wd <- getwd()
+
+# Download the ZIP file to the current working directory
+download.file("https://github.com/autistic96/project-2/archive/refs/heads/main.zip",paste0(current_wd, "/map_shapefiles.zip"), 
+              mode = "wb")
+
+# Unzip the ZIP file
+unzip("map_shapefiles.zip", exdir = "map_shapefiles_folder")
+
+unzip("map_shapefiles_folder/project-2-main/map_shapefiles.zip", exdir = "map_shapefiles_folder")
+
+# Path to the shapefile within the unzipped folder
+shp_path <- "map_shapefiles_folder/map_shapefiles"
+
+
+
+world_map = st_read(shp_path)
+
 # Top 10 highest growth rates ordered from high to low by country/territory
-names(highest_growths) <- countries_with_highest_growth_rate
+names(highest_growths) = countries_with_highest_growth_rate
 highest_growths
-
-# Plot of the top 10 countries/territories with the highest population growth rate
-world_pop %>% 
-  filter(`Country/Territory` %in% countries_with_highest_growth_rate) %>% 
-  ggplot(aes(x = Year, y = Population, color = `Country/Territory`)) + 
-  geom_point()
-
 
 countries_with_lowest_growth_rate <- world_pop %>% 
   arrange(`Growth Rate`) %>% 
@@ -90,11 +130,60 @@ lowest_growths <- lowest_growths[seq(1, 80, 8)]
 names(lowest_growths) <- countries_with_lowest_growth_rate
 lowest_growths
 
+countries_with_lowest_growth_rate
+countries_with_highest_growth_rate
+
+# Add a fill column to your world_map data
+top_and_bottom <- world_map %>% 
+  mutate(fill = case_when(
+    `NAME` %in% countries_with_highest_growth_rate ~ "blue",
+    `NAME` %in% countries_with_lowest_growth_rate ~ "red",
+    TRUE ~ "white"
+  ))
+
+# Generate the plot
+p <- ggplot(data = top_and_bottom) + 
+  geom_sf(aes(fill = fill)) + 
+  geom_sf_text(aes(label = NAME), check_overlap = TRUE) +  # Add labels
+  ggtitle("Map of World") +
+  scale_fill_identity()
+
+# Save the plot
+ggsave("top_and_bottom_10_with_labels.png", plot = p, width = 44, height = 40)
+
+
+
+
+```
+
+
+
+
+```{r analyze}
+
+# Plot of the top 10 countries/territories with the highest population growth rate
+world_pop %>%
+  filter(Year == "2022" & `Country/Territory` %in% countries_with_highest_growth_rate) %>%
+  ggplot(aes(x = reorder(`Country/Territory`, -Population), y = Population)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Top 10 Countries (Highest Growth Rate) in 2022") +
+  xlab("Country/Territory") +
+  ylab("Population") +
+  theme_minimal() +
+  coord_flip()
+
 # Plot of bottom 10 countries/territories with the lowest population growth rate
-world_pop %>% 
-  filter(`Country/Territory` %in% countries_with_lowest_growth_rate) %>% 
-  ggplot(aes(x = Year, y = Population, color = `Country/Territory`)) + 
-  geom_point()
+world_pop %>%
+  filter(Year == "2022" & `Country/Territory` %in% countries_with_lowest_growth_rate) %>%
+  ggplot(aes(x = reorder(`Country/Territory`, Population), y = Population)) + 
+  geom_bar(stat="identity") +
+  ggtitle("Bottom 10 Countries (Lowest Growth Rate) in 2022") +
+  xlab("Country/Territory") +
+  ylab("Population") +
+  theme_minimal() +
+  coord_flip()
+
+
 
 
 recent_pop_data <- world_pop %>%
@@ -110,7 +199,28 @@ tail(recent_pop_data, n = 10)
 
 # Plot of population growth by year for all countries/territory
 # Asia have the biggest increase in terms of population
-world_pop %>%
-  ggplot(aes(x = Year, y = Population)) + geom_point(aes(col = Continent))
+
+world_pop$Year <- as.numeric(world_pop$Year)
+
+# Group by Year and Continent and then sum the Population
+world_pop_summary <- world_pop %>%
+  group_by(Year, Continent) %>%
+  summarize(Total_Population = sum(Population))
+
+# Create the ggplot line graph
+ggplot(data = world_pop_summary, aes(x = Year, y = Total_Population, color = Continent)) +
+  geom_line(size = 1) +
+  ggtitle("World Population Over Time by Continent") +
+  xlab("Year") +
+  ylab("Total Population") +
+  theme_minimal()
   
 ```
+
+
+
+##Conclusion
+
+After tidying and analyzing the World Population Dataset, several key insights emerged. We found that there are countries with significantly high growth rates, as well as those with low or even negative growth rates. This information could be crucial for policymakers in these nations. We also plotted the 10 countries with the highest and lowest growth rates, and their respective population sizes for the year 2022. These visualizations give a snapshot of global population dynamics and how disparate they can be from one nation to another.
+
+Furthermore, we looked at the population trends over time by continent. The line graph clearly showed that Asia has been experiencing the most significant increase in terms of population over the years. This could have various socio-economic implications, such as increased demand for resources and potential strain on public services in densely populated regions.
