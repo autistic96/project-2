@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##Intro
 
-The World Population Dataset shows us population data across various countries and territories from 1970 to 2022. This dataset includes variables like area, density per km, growth rate, and the percentage of the world population. Its important to understand how to work with population data so that we can accuratly make predictions and models.
+The World Population Dataset shows us population data across various countries and territories from 1970 to 2022. This dataset includes variables like area, density per km, growth rate, and the percentage of the world population. Its important to understand how to work with population data so that we can accurately make predictions and models.
 
 
 tidyr and dplyr are both part of the tidyverse
@@ -45,7 +45,7 @@ The dataset was first tidied to transform it into a long format, making it easie
 
 ```{r tidying}
 
-# Copy and pasting what Matthew wrote on the discussion board, the below words are not mine
+# Copy and pasting what Matthew wrote on the discussion board
 #This details regional populations from the years 2000 to 2022. To tidy this dataset, I would collapse the year variables into a single grouping column, effectively making it into a long dataset. From there, we can easily graph population rates by year, and potentially by country
 
 # I will first rename the column names to make them more clear
@@ -80,14 +80,11 @@ highest_growths <- world_pop %>%
 
 highest_growths <- highest_growths[seq(1, 80, 8)]
 
-
-
-
 ```
 
 
 
-Here, we loaded the world_map dataframe using st_read(). Then, two sets of countries are identified: those with the highest and lowest population growth rates. These sets are named countries_with_highest_growth_rate and countries_with_lowest_growth_rate, respectively. For the lowest growth rate, every 8th country is selected from a sorted list, up to 80. The top_and_bottom dataframe augments the world_map data by adding a fill column to color-code countries based on their growth rate. Finally, a plot is generated using ggplot2. The plot uses different colors for countries with the highest and lowest growth rates and labels them by name. The plot is then saved as a PNG file in the currentn working directory.
+Here, we loaded the world_map data frame using st_read(). Then, two sets of countries are identified: those with the highest and lowest population growth rates. These sets are named countries_with_highest_growth_rate and countries_with_lowest_growth_rate, respectively. For the lowest growth rate, every 8th country is selected from a sorted list, up to 80. The top_and_bottom data frame augments the world_map data by adding a fill column to color-code countries based on their growth rate. Finally, a plot is generated using ggplot2. The plot uses different colors for countries with the highest and lowest growth rates and labels them by name. The plot is then saved as a PNG file in the current working directory.
 
 ```{r}
 
@@ -205,11 +202,11 @@ world_pop$Year <- as.numeric(world_pop$Year)
 # Group by Year and Continent and then sum the Population
 world_pop_summary <- world_pop %>%
   group_by(Year, Continent) %>%
-  summarize(Total_Population = sum(Population))
+  summarise(Total_Population = sum(Population))
 
 # Create the ggplot line graph
 ggplot(data = world_pop_summary, aes(x = Year, y = Total_Population, color = Continent)) +
-  geom_line(size = 1) +
+  geom_line(linewidth = 1) +
   ggtitle("World Population Over Time by Continent") +
   xlab("Year") +
   ylab("Total Population") +
