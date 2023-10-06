@@ -1,40 +1,31 @@
-# Diabetes Dataset Analysis
+# World Population Dataset Analysis
 
-## Team Members
+## Team Android Members
 
-- Matthew Roland
-- Jean Jimenez
-- Kelly Eng
+Kelly Eng
+Matthew Roland
+Jean Jimenez
 
-## Introduction
 
-This repository contains an in-depth analysis of a Diabetes dataset. The dataset includes information on individuals both with and without diabetes. Various risk factors for developing diabetes, such as age, BMI, glucose and insulin levels, and the diabetes pedigree function, are also part of this dataset. The dataset was sourced from Kaggle and was recommended for study by Folorunsho Atanda on Blackboard.
+## Intro
+
+This repository contains an R script focused on analyzing the World Population Dataset. The dataset includes key metrics like population, area, and growth rate for various countries and territories from 1970 to 2022.
 
 ## Dataset Overview
 
-The dataset consists of multiple predictors related to diabetes, including but not limited to:
-- Age
-- BMI
-- Glucose Levels
-- Insulin Levels
-- Blood Pressure
-- Diabetes Pedigree Function
+The World Population Dataset provides detailed information about population metrics for different countries and territories. It includes variables like area, density per square kilometer, growth rate, and the percentage of the world population. The dataset is transformed into a long format for easier manipulation and visualization.
 
 ## Analysis Summary
 
-1. **Data Cleaning**: The dataset was initially cleaned to group all predictors of diabetes under a single column.
-  
-2. **Descriptive Analysis**: Various statistical measures, such as mean and median, were calculated to understand the risk factors associated with diabetes. 
+The analysis identifies the top 10 countries with the highest and lowest population growth rates. These are visualized on a world map, color-coded based on their growth rate. Bar plots are generated to showcase the population sizes of these countries for the year 2022. Additionally, line graphs depict population growth trends over the years for each continent.
 
-3. **Pedigree Function Analysis**: The diabetes pedigree function was analyzed to determine its effectiveness as a predictive marker for diabetes. Our analysis suggests that while it is a useful marker, it may not be the most reliable indicator by itself.
+### Map Files Inclusion
 
-4. **Predictor Averages**: Mean values for each predictor were calculated and compared between the diabetes-positive and diabetes-negative groups. Elevated levels of insulin and glucose appeared to be strong predictors for diabetes.
+The analysis incorporates geographical data through the inclusion of map files. These map files are read into the script using the `st_read()` function from the `sf` package in R. They serve as the base layer for visualizations that highlight countries with the highest and lowest population growth rates. The map adds a spatial dimension to the analysis, making it easier to identify geographical patterns or anomalies in population growth. This enhances the comprehensiveness and interpretability of the study's findings.
 
-5. **Blood Pressure Distribution**: A focused analysis was conducted on the distribution of blood pressure in both diabetes-positive and diabetes-negative groups. The distributions were found to be similar, although the mean blood pressure was slightly higher in the diabetes-positive group.
+A shaded map highlighting the top 10 and bottom 10 countries based on their population growth rates will be generated. This map will be saved as a PNG file in the current working directory. The map uses different colors to represent countries with the highest and lowest growth rates, offering a quick, visual summary of global population trends. This feature enhances the analysis by providing an immediate spatial context to the numerical data.
 
-## Conclusions
 
-- Insulin and glucose levels appear to be the most impactful predictors for having diabetes.
-- The diabetes pedigree function can serve as a risk marker but may not be sufficient as a standalone predictive tool.
-- Blood pressure, although slightly higher in diabetes-positive individuals, does not show a significant difference between the two groups. Therefore, it may not serve as a reliable standalone predictor for diabetes.
+## Conclusion
 
+The analysis offers vital insights into global population dynamics. Countries with significantly high and low growth rates are identified, which could be crucial for policy decisions. The data also reveals that Asia has experienced the most significant population increase over the years. This information can serve as a basis for further socio-economic studies and planning.
